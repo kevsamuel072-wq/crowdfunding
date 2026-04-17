@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[70vh] items-center justify-center">
+  <div class="w-full max-w-sm">
+
+    <!-- Card -->
+    <div class="rounded-xl border border-zinc-200 bg-white shadow-sm p-8">
+      <div class="mb-6 text-center">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 text-white text-xl font-bold">F</div>
+        <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Bienvenido/a</h1>
+        <p class="mt-1 text-sm text-zinc-500">Ingresá a tu cuenta para continuar</p>
+      </div>
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}"
+              class="block text-sm font-medium text-zinc-700 mb-1.5">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              {% for error in field.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+          <div class="rounded-md border border-red-200 bg-red-50 p-3">
+            {% for error in form.non_field_errors %}
+              <p class="text-sm text-red-700">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <button type="submit"
+          class="w-full rounded-md bg-zinc-900 py-2.5 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors mt-2">
+          Iniciar sesión
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-zinc-500">
+        ¿No tienes cuenta?
+        <a href="{% url 'register' %}" class="font-medium text-zinc-900 hover:underline">Registrarse</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

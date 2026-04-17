@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}{{ categoria.nombre }}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+  <a href="{% url 'home' %}" class="hover:text-zinc-900">Inicio</a>
+  <span>/</span>
+  <a href="{% url 'campaign_list' %}" class="hover:text-zinc-900">Campañas</a>
+  <span>/</span>
+  <span class="text-zinc-900 font-medium">{{ categoria.nombre }}</span>
+</nav>
+
+<!-- Header categoría -->
+<div class="mb-8 flex flex-col sm:flex-row sm:items-start gap-4">
+  <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-900">
+    <svg class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+    </svg>
+  </div>
+  <div>
+    <h1 class="text-3xl font-bold tracking-tight text-zinc-900">{{ categoria.nombre }}</h1>
+    <p class="mt-1 text-zinc-500">{{ categoria.descripcion }}</p>
+    <p class="mt-2 text-sm text-zinc-400">
+      {{ campanas.count }} campaña{{ campanas.count|pluralize:"s" }} activa{{ campanas.count|pluralize:"s" }}
+    </p>
+  </div>
+</div>
+
+<!-- Otras categorías -->
+<div class="flex flex-wrap gap-2 mb-8">
+  <a href="{% url 'campaign_list' %}"
+    class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 transition-colors">
+    Todas
+  </a>
+  {% for cat in categorias %}
+    <a href="{% url 'campaigns_by_category' cat.slug %}"
+      class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors
+        {% if cat.slug == categoria.slug %}border-zinc-900 bg-zinc-900 text-white{% else %}border-zinc-200 bg-white text-zinc-600 hover:border-zinc-900 hover:text-zinc-900{% endif %}">
+      {{ cat.nombre }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Grid de campañas -->
+{% if campanas %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for campana in campanas %}
+      <article class="card-hover rounded-xl border border-zinc-200 bg-white overflow-hidden flex flex-col">
+        {% if campana.imagen %}
+          <img src="{{ campana.imagen.url }}" alt="{{ campana.titulo }}" class="h-44 w-full object-cover" />
+        {% else %}
+          <div class="h-44 w-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+            <svg class="h-12 w-12 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </div>
+        {% endif %}
+        <div class="flex flex-col flex-1 p-5">
+          <h3 class="font-semibold text-zinc-900 mb-2 flex-1 line-clamp-2">
+            <a href="{% url 'campaign_detail' campana.pk %}" class="hover:underline">{{ campana.titulo }}</a>
+          </h3>
+          <p class="text-sm text-zinc-500 line-clamp-2 mb-4">{{ campana.descripcion }}</p>
+          <div class="mb-4">
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="font-medium text-zinc-900">${{ campana.monto_recaudado|floatformat:0 }}</span>
+              <span class="text-zinc-500">{{ campana.porcentaje_completado|floatformat:0 }}%</span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-zinc-100">
+              <div class="progress-bar h-2 rounded-full bg-zinc-900"
+                style="width: max({{ campana.porcentaje_completado|floatformat:0 }}%, {% if campana.monto_recaudado > 0 %}4px{% else %}0px{% endif %})"></div>
+            </div>
+            <div class="flex justify-between text-xs text-zinc-400 mt-1">
+              <span>Meta ${{ campana.monto_objetivo|floatformat:0 }}</span>
+              <span>{{ campana.dias_restantes }}d restantes</span>
+            </div>
+          </div>
+          <a href="{% url 'campaign_detail' campana.pk %}"
+            class="inline-flex justify-center items-center rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 transition-colors">
+            Ver campaña
+          </a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="rounded-xl border border-dashed border-zinc-300 bg-white p-16 text-center">
+    <p class="text-zinc-500">No hay campañas activas en esta categoría.</p>
+    <a href="{% url 'campaign_list' %}" class="mt-4 inline-flex text-sm font-medium text-zinc-900 hover:underline">
+      Ver todas las campañas
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

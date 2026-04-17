@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Campañas{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="mb-8">
+  <h1 class="text-3xl font-bold tracking-tight text-zinc-900">Todas las campañas</h1>
+  <p class="mt-2 text-zinc-500">Descubre proyectos activos que necesitan tu apoyo.</p>
+</div>
+
+<!-- Barra de búsqueda + filtros de categoría -->
+<div class="flex flex-col sm:flex-row gap-4 mb-8">
+  <form method="get" class="flex flex-1 gap-2">
+    <input type="text" name="q" value="{{ query }}"
+      placeholder="Buscar campañas..."
+      class="flex h-10 flex-1 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950" />
+    <button type="submit"
+      class="inline-flex items-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors">
+      Buscar
+    </button>
+    {% if query %}
+      <a href="{% url 'campaign_list' %}"
+        class="inline-flex items-center rounded-md border border-zinc-200 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors">
+        Limpiar
+      </a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Categorías como chips -->
+<div class="flex flex-wrap gap-2 mb-8">
+  <a href="{% url 'campaign_list' %}"
+    class="inline-flex items-center rounded-full border border-zinc-900 bg-zinc-900 px-3 py-1 text-xs font-medium text-white">
+    Todas
+  </a>
+  {% for cat in categorias %}
+    <a href="{% url 'campaigns_by_category' cat.slug %}"
+      class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 transition-colors">
+      {{ cat.nombre }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Grid de campañas -->
+{% if campanas %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for campana in campanas %}
+      <article class="card-hover rounded-xl border border-zinc-200 bg-white overflow-hidden flex flex-col">
+        {% if campana.imagen %}
+          <img src="{{ campana.imagen.url }}" alt="{{ campana.titulo }}"
+            class="h-44 w-full object-cover" />
+        {% else %}
+          <div class="h-44 w-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+            <svg class="h-12 w-12 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </div>
+        {% endif %}
+
+        <div class="flex flex-col flex-1 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+              {{ campana.categoria.nombre }}
+            </span>
+            {% if campana.finalizada %}
+              <span class="inline-flex items-center rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-500">Finalizada</span>
+            {% endif %}
+          </div>
+
+          <h3 class="font-semibold text-zinc-900 mb-2 flex-1 line-clamp-2">
+            <a href="{% url 'campaign_detail' campana.pk %}" class="hover:underline">
+              {{ campana.titulo }}
+            </a>
+          </h3>
+
+          <p class="text-sm text-zinc-500 line-clamp-2 mb-4">{{ campana.descripcion }}</p>
+
+          <!-- Progreso -->
+          <div class="mb-4">
+            <div class="flex justify-between text-xs text-zinc-500 mb-1.5">
+              <span class="font-medium text-zinc-900">${{ campana.monto_recaudado|floatformat:0 }}</span>
+              <span>{{ campana.porcentaje_completado|floatformat:0 }}%</span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-zinc-100">
+              <div class="progress-bar h-2 rounded-full
+                {% if campana.porcentaje_completado >= 100 %}bg-green-500
+                {% elif campana.porcentaje_completado >= 50 %}bg-blue-500
+                {% else %}bg-zinc-900{% endif %}"
+                style="width: max({{ campana.porcentaje_completado|floatformat:0 }}%, {% if campana.monto_recaudado > 0 %}4px{% else %}0px{% endif %})"></div>
+            </div>
+            <div class="flex justify-between text-xs text-zinc-400 mt-1">
+              <span>Meta ${{ campana.monto_objetivo|floatformat:0 }}</span>
+              <span>{{ campana.dias_restantes }}d restantes</span>
+            </div>
+          </div>
+
+          <a href="{% url 'campaign_detail' campana.pk %}"
+            class="inline-flex justify-center items-center rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 transition-colors">
+            Ver campaña
+          </a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="rounded-xl border border-dashed border-zinc-300 bg-white p-16 text-center">
+    <svg class="mx-auto h-12 w-12 text-zinc-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p class="text-zinc-500 font-medium">No se encontraron campañas</p>
+    {% if query %}
+      <p class="text-sm text-zinc-400 mt-1">Intentá con otro término de búsqueda</p>
+      <a href="{% url 'campaign_list' %}" class="mt-4 inline-flex items-center text-sm font-medium text-zinc-900 hover:underline">
+        Ver todas las campañas
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% endblock %}

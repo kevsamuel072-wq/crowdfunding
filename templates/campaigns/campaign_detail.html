@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}{{ campana.titulo }}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+  <a href="{% url 'home' %}" class="hover:text-zinc-900">Inicio</a>
+  <span>/</span>
+  <a href="{% url 'campaign_list' %}" class="hover:text-zinc-900">Campañas</a>
+  <span>/</span>
+  <a href="{% url 'campaigns_by_category' campana.categoria.slug %}" class="hover:text-zinc-900">{{ campana.categoria.nombre }}</a>
+  <span>/</span>
+  <span class="text-zinc-900 font-medium truncate max-w-xs">{{ campana.titulo }}</span>
+</nav>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  <!-- Columna principal -->
+  <div class="lg:col-span-2 space-y-6">
+
+    <!-- Imagen -->
+    {% if campana.imagen %}
+      <img src="{{ campana.imagen.url }}" alt="{{ campana.titulo }}"
+        class="w-full rounded-xl object-cover max-h-80" />
+    {% else %}
+      <div class="w-full h-64 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+        <svg class="h-16 w-16 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </div>
+    {% endif %}
+
+    <!-- Título y categoría -->
+    <div>
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        <span class="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600">
+          {{ campana.categoria.nombre }}
+        </span>
+        {% if not campana.activa or campana.finalizada %}
+          <span class="inline-flex items-center rounded-full bg-zinc-200 px-3 py-1 text-xs font-medium text-zinc-500">
+            {% if campana.finalizada %}Finalizada{% else %}Inactiva{% endif %}
+          </span>
+        {% else %}
+          <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+            Activa
+          </span>
+        {% endif %}
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight text-zinc-900">{{ campana.titulo }}</h1>
+    </div>
+
+    <!-- Descripción -->
+    <div class="prose prose-zinc max-w-none">
+      <p class="text-zinc-600 leading-relaxed whitespace-pre-line">{{ campana.descripcion }}</p>
+    </div>
+
+    <!-- Fechas -->
+    <div class="flex flex-wrap gap-4 text-sm text-zinc-500 border-t border-zinc-100 pt-4">
+      <span>
+        <span class="font-medium text-zinc-700">Inicio:</span>
+        {{ campana.fecha_inicio|date:"d/m/Y" }}
+      </span>
+      <span>
+        <span class="font-medium text-zinc-700">Cierre:</span>
+        {{ campana.fecha_fin|date:"d/m/Y" }}
+      </span>
+      <span>
+        <span class="font-medium text-zinc-700">Publicada:</span>
+        {{ campana.created_at|date:"d/m/Y" }}
+      </span>
+    </div>
+
+    <!-- DONACIONES -->
+    <div class="border-t border-zinc-100 pt-6">
+      <h2 class="text-xl font-bold text-zinc-900 mb-4">
+        Donaciones
+        <span class="ml-2 text-base font-normal text-zinc-400">({{ donaciones.count }})</span>
+      </h2>
+
+      {% if donaciones %}
+        <div class="space-y-3">
+          {% for donacion in donaciones %}
+            <div class="flex items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-4">
+              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-zinc-200 text-sm font-semibold text-zinc-700">
+                {{ donacion.usuario.first_name|first|default:donacion.usuario.username|first|upper }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <span class="font-medium text-zinc-900 text-sm">
+                    {{ donacion.usuario.first_name|default:donacion.usuario.username }}
+                    {% if donacion.usuario.last_name %}{{ donacion.usuario.last_name }}{% endif %}
+                  </span>
+                  <span class="text-sm font-bold text-zinc-900">${{ donacion.monto|floatformat:2 }}</span>
+                </div>
+                {% if donacion.comentario %}
+                  <p class="text-sm text-zinc-500 mt-1">{{ donacion.comentario }}</p>
+                {% endif %}
+                <p class="text-xs text-zinc-400 mt-1">{{ donacion.created_at|date:"d/m/Y H:i" }}</p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="rounded-lg border border-dashed border-zinc-200 p-8 text-center text-zinc-400">
+          <p class="text-sm">Aún no hay donaciones. ¡Sé el primero/a!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="space-y-4">
+
+    <!-- Card de progreso -->
+    <div class="sticky top-24 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div class="mb-4">
+        <div class="text-3xl font-bold text-zinc-900">${{ campana.monto_recaudado|floatformat:0 }}</div>
+        <div class="text-sm text-zinc-500 mt-0.5">
+          recaudados de <span class="font-medium text-zinc-700">${{ campana.monto_objetivo|floatformat:0 }}</span>
+        </div>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="mb-4">
+        <div class="h-2.5 w-full rounded-full bg-zinc-100">
+          <div class="progress-bar h-2.5 rounded-full
+            {% if campana.porcentaje_completado >= 100 %}bg-green-500
+            {% elif campana.porcentaje_completado >= 50 %}bg-blue-500
+            {% else %}bg-zinc-900{% endif %}"
+            style="width: max({{ campana.porcentaje_completado|floatformat:0 }}%, {% if campana.monto_recaudado > 0 %}4px{% else %}0px{% endif %})"></div>
+        </div>
+        <div class="flex justify-between text-xs text-zinc-500 mt-1.5">
+          <span>{{ campana.porcentaje_completado|floatformat:0 }}% completado</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 gap-4 mb-6 border-t border-zinc-100 pt-4">
+        <div>
+          <div class="text-xl font-bold text-zinc-900">{{ donaciones.count }}</div>
+          <div class="text-xs text-zinc-500">donaciones</div>
+        </div>
+        <div>
+          <div class="text-xl font-bold text-zinc-900">{{ campana.dias_restantes }}</div>
+          <div class="text-xs text-zinc-500">días restantes</div>
+        </div>
+      </div>
+
+      <!-- Botón de donar -->
+      {% if campana.activa and not campana.finalizada %}
+        {% if user.is_authenticated %}
+          <a href="{% url 'donate' campana.pk %}"
+            class="w-full inline-flex justify-center items-center rounded-md bg-zinc-900 px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors">
+            {% if ya_dono %}Donar nuevamente{% else %}Apoyar esta campaña{% endif %}
+          </a>
+          {% if ya_dono %}
+            <p class="text-xs text-center text-zinc-400 mt-2">Ya donaste a esta campaña</p>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}?next={% url 'donate' campana.pk %}"
+            class="w-full inline-flex justify-center items-center rounded-md bg-zinc-900 px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors">
+            Iniciar sesión para donar
+          </a>
+          <p class="text-xs text-center text-zinc-400 mt-2">
+            <a href="{% url 'register' %}" class="hover:underline">¿No tienes cuenta? Regístrate gratis</a>
+          </p>
+        {% endif %}
+      {% else %}
+        <div class="w-full rounded-md border border-zinc-200 px-4 py-3 text-center text-sm text-zinc-400">
+          Esta campaña {% if campana.finalizada %}ha finalizado{% else %}no está activa{% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

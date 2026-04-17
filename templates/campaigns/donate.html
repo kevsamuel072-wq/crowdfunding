@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Donar a {{ campana.titulo }}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+  <a href="{% url 'home' %}" class="hover:text-zinc-900">Inicio</a>
+  <span>/</span>
+  <a href="{% url 'campaign_list' %}" class="hover:text-zinc-900">Campañas</a>
+  <span>/</span>
+  <a href="{% url 'campaign_detail' campana.pk %}" class="hover:text-zinc-900 truncate max-w-xs">{{ campana.titulo }}</a>
+  <span>/</span>
+  <span class="text-zinc-900 font-medium">Donar</span>
+</nav>
+
+<div class="mx-auto max-w-2xl">
+  <!-- Resumen de la campaña -->
+  <div class="mb-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+    <p class="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">Estás apoyando</p>
+    <h2 class="text-lg font-bold text-zinc-900">{{ campana.titulo }}</h2>
+    <div class="flex items-center gap-3 mt-3">
+      <div class="flex-1 h-1.5 rounded-full bg-zinc-200">
+        <div class="h-1.5 rounded-full bg-zinc-900" style="width: {{ campana.porcentaje_completado }}%"></div>
+      </div>
+      <span class="text-sm text-zinc-500 flex-shrink-0">
+        ${{ campana.monto_recaudado|floatformat:0 }} / ${{ campana.monto_objetivo|floatformat:0 }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Formulario de donación -->
+  <div class="rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+    <h1 class="text-2xl font-bold tracking-tight text-zinc-900 mb-2">Realizar donación</h1>
+    <p class="text-sm text-zinc-500 mb-6">
+      Tu donación es un gesto de apoyo. No se procesa ningún pago real.
+    </p>
+
+    <!-- Montos sugeridos -->
+    <div class="mb-6">
+      <p class="text-sm font-medium text-zinc-700 mb-3">Montos sugeridos</p>
+      <div class="flex flex-wrap gap-2" id="suggestions">
+        {% for amount in amounts %}
+          <button type="button"
+            onclick="document.getElementById('id_monto').value='{{ amount }}'; setActive(this)"
+            class="suggestion-btn rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-900 hover:text-zinc-900 transition-colors">
+            ${{ amount }}
+          </button>
+        {% endfor %}
+        <button type="button"
+          onclick="document.getElementById('id_monto').value=''; document.getElementById('id_monto').focus(); setActive(this)"
+          class="suggestion-btn rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-900 hover:text-zinc-900 transition-colors">
+          Otro
+        </button>
+      </div>
+    </div>
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Monto -->
+      <div>
+        <label for="{{ form.monto.id_for_label }}"
+          class="block text-sm font-medium text-zinc-700 mb-1.5">
+          {{ form.monto.label }}
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-3 flex items-center text-zinc-400 text-sm">$</span>
+          <input type="number" name="monto" id="{{ form.monto.id_for_label }}"
+            placeholder="0.00" min="1" step="0.01"
+            class="flex h-10 w-full rounded-md border border-zinc-200 bg-white pl-7 pr-3 py-2 text-sm ring-offset-white placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
+            value="{{ form.monto.value|default:'' }}" />
+        </div>
+        {% for error in form.monto.errors %}
+          <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <!-- Comentario -->
+      <div>
+        <label for="{{ form.comentario.id_for_label }}"
+          class="block text-sm font-medium text-zinc-700 mb-1.5">
+          {{ form.comentario.label }}
+          <span class="font-normal text-zinc-400">(opcional)</span>
+        </label>
+        {{ form.comentario }}
+        {% for error in form.comentario.errors %}
+          <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <button type="submit"
+          class="flex-1 inline-flex justify-center items-center rounded-md bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors">
+          Confirmar donación
+        </button>
+        <a href="{% url 'campaign_detail' campana.pk %}"
+          class="flex-1 inline-flex justify-center items-center rounded-md border border-zinc-200 px-6 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function setActive(btn) {
+    document.querySelectorAll('.suggestion-btn').forEach(b => {
+      b.classList.remove('border-zinc-900', 'bg-zinc-900', 'text-white');
+      b.classList.add('border-zinc-200', 'text-zinc-700');
+    });
+    btn.classList.add('border-zinc-900', 'bg-zinc-900', 'text-white');
+    btn.classList.remove('border-zinc-200', 'text-zinc-700');
+  }
+</script>
+
+{% endblock %}

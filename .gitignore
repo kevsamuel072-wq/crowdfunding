@@ -1,0 +1,40 @@
+# Entorno virtual
+venv/
+env/
+
+# Variables de entorno y secretos
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Base de datos local
+db.sqlite3
+
+# Archivos de media subidos por usuarios
+media/
+
+# Archivos estáticos recolectados
+staticfiles/
+
+# Django
+*.log
+local_settings.py
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cobertura de tests
+.coverage
+htmlcov/
+.claude

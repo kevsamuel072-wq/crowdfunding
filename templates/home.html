@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="relative overflow-hidden rounded-2xl bg-green-950 px-8 py-16 text-white mb-12">
+  <div class="relative z-10 max-w-2xl">
+    <span class="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-300 mb-4">
+      Plataforma de crowdfunding
+    </span>
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
+      Apoya proyectos que<br />
+      <span class="text-zinc-400">transforman el mundo</span>
+    </h1>
+    <p class="text-zinc-400 text-lg mb-8 leading-relaxed">
+      Descubre campañas increíbles en tecnología, educación, salud y más.
+      Cada donación, por pequeña que sea, marca la diferencia.
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="{% url 'campaign_list' %}"
+        class="inline-flex items-center rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-100 transition-colors">
+        Ver campañas
+      </a>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}"
+          class="inline-flex items-center rounded-lg border border-zinc-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition-colors">
+          Crear cuenta gratis
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  <!-- decoración -->
+  <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-zinc-800 to-transparent opacity-60"></div>
+</section>
+
+<!-- ESTADÍSTICAS -->
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+  {% with stats=total_campanas %}
+  <div class="rounded-xl border border-zinc-200 bg-white p-6 text-center">
+    <div class="text-3xl font-bold text-zinc-900">{{ total_campanas }}</div>
+    <div class="text-sm text-zinc-500 mt-1">Campañas activas</div>
+  </div>
+  <div class="rounded-xl border border-zinc-200 bg-white p-6 text-center">
+    <div class="text-3xl font-bold text-zinc-900">{{ total_donaciones }}</div>
+    <div class="text-sm text-zinc-500 mt-1">Donaciones realizadas</div>
+  </div>
+  <div class="rounded-xl border border-zinc-200 bg-white p-6 text-center">
+    <div class="text-3xl font-bold text-zinc-900">${{ total_recaudado|floatformat:0 }}</div>
+    <div class="text-sm text-zinc-500 mt-1">Total recaudado</div>
+  </div>
+  {% endwith %}
+</section>
+
+<!-- CAMPAÑAS RECIENTES -->
+<section class="mb-12">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold tracking-tight">Campañas recientes</h2>
+    <a href="{% url 'campaign_list' %}"
+      class="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+      Ver todas →
+    </a>
+  </div>
+
+  {% if campanas_recientes %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for campana in campanas_recientes %}
+        <article class="card-hover rounded-xl border border-zinc-200 bg-white overflow-hidden flex flex-col">
+          <!-- Imagen -->
+          {% if campana.imagen %}
+            <img src="{{ campana.imagen.url }}" alt="{{ campana.titulo }}"
+              class="h-44 w-full object-cover" />
+          {% else %}
+            <div class="h-44 w-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+              <svg class="h-12 w-12 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </div>
+          {% endif %}
+
+          <div class="flex flex-col flex-1 p-5">
+            <!-- Categoría badge -->
+            <span class="inline-flex w-fit items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600 mb-3">
+              {{ campana.categoria.nombre }}
+            </span>
+
+            <h3 class="font-semibold text-zinc-900 mb-2 line-clamp-2 flex-1">
+              <a href="{% url 'campaign_detail' campana.pk %}" class="hover:underline">
+                {{ campana.titulo }}
+              </a>
+            </h3>
+
+            <!-- Progreso -->
+            <div class="mt-4">
+              <div class="flex justify-between text-xs text-zinc-500 mb-1.5">
+                <span>${{ campana.monto_recaudado|floatformat:0 }} recaudados</span>
+                <span>{{ campana.porcentaje_completado|floatformat:0 }}%</span>
+              </div>
+              <div class="h-2 w-full rounded-full bg-zinc-100">
+                <div class="progress-bar h-2 rounded-full bg-zinc-900"
+                  style="width: max({{ campana.porcentaje_completado|floatformat:0 }}%, {% if campana.monto_recaudado > 0 %}4px{% else %}0px{% endif %})"></div>
+              </div>
+              <div class="flex justify-between text-xs text-zinc-400 mt-1.5">
+                <span>Meta: ${{ campana.monto_objetivo|floatformat:0 }}</span>
+                <span>{{ campana.dias_restantes }} días restantes</span>
+              </div>
+            </div>
+
+            <a href="{% url 'campaign_detail' campana.pk %}"
+              class="mt-4 inline-flex justify-center items-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors">
+              Ver campaña
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="rounded-xl border border-dashed border-zinc-300 bg-white p-12 text-center text-zinc-400">
+      <p>Aún no hay campañas activas.</p>
+    </div>
+  {% endif %}
+</section>
+
+<!-- CATEGORÍAS -->
+<section>
+  <h2 class="text-2xl font-bold tracking-tight mb-6">Explorar por categoría</h2>
+  {% if categorias %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      {% for cat in categorias %}
+        <a href="{% url 'campaigns_by_category' cat.slug %}"
+          class="card-hover group rounded-xl border border-zinc-200 bg-white p-5 text-center hover:border-zinc-900 transition-colors">
+          <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-100 group-hover:bg-zinc-900 transition-colors">
+            <svg class="h-6 w-6 text-zinc-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+          </div>
+          <div class="text-sm font-semibold text-zinc-900">{{ cat.nombre }}</div>
+          <div class="text-xs text-zinc-400 mt-1">{{ cat.total }} campaña{{ cat.total|pluralize:"s" }}</div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-zinc-400 text-sm">No hay categorías disponibles aún.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

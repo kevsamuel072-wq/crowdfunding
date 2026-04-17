@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}FundIt{% endblock %} – Plataforma de Crowdfunding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            border: 'hsl(240 5.9% 90%)',
+            ring:   'hsl(240 5% 64.9%)',
+            background: 'hsl(0 0% 100%)',
+            foreground:  'hsl(240 10% 3.9%)',
+            primary:   { DEFAULT: 'hsl(240 5.9% 10%)', foreground: 'hsl(0 0% 98%)' },
+            secondary: { DEFAULT: 'hsl(240 4.8% 95.9%)', foreground: 'hsl(240 5.9% 10%)' },
+            muted:     { DEFAULT: 'hsl(240 4.8% 95.9%)', foreground: 'hsl(240 3.8% 46.1%)' },
+            accent:    { DEFAULT: 'hsl(240 4.8% 95.9%)', foreground: 'hsl(240 5.9% 10%)' },
+            card:      { DEFAULT: 'hsl(0 0% 100%)', foreground: 'hsl(240 10% 3.9%)' },
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .progress-bar { transition: width 0.6s ease; }
+    .card-hover { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+    .card-hover:hover { box-shadow: 0 10px 25px -5px rgba(0,0,0,.1); transform: translateY(-2px); }
+  </style>
+</head>
+<body class="h-full bg-zinc-50 text-zinc-900 antialiased">
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+
+        <!-- Logo -->
+        <a href="{% url 'home' %}" class="flex items-center gap-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white font-bold text-sm">F</div>
+          <span class="text-xl font-bold tracking-tight">FundIt</span>
+        </a>
+
+        <!-- Nav links -->
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+          <a href="{% url 'home' %}" class="text-zinc-600 hover:text-zinc-900 transition-colors">Inicio</a>
+          <a href="{% url 'campaign_list' %}" class="text-zinc-600 hover:text-zinc-900 transition-colors">Campañas</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'my_donations' %}" class="text-zinc-600 hover:text-zinc-900 transition-colors">Mis donaciones</a>
+          {% endif %}
+          {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}" class="text-zinc-600 hover:text-zinc-900 transition-colors">Admin</a>
+          {% endif %}
+        </nav>
+
+        <!-- Auth buttons -->
+        <div class="flex items-center gap-3">
+          {% if user.is_authenticated %}
+            <span class="hidden sm:block text-sm text-zinc-500">
+              Hola, <span class="font-medium text-zinc-900">{{ user.first_name|default:user.username }}</span>
+            </span>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit"
+                class="inline-flex items-center rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
+                Cerrar sesión
+              </button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}"
+              class="inline-flex items-center rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors">
+              Iniciar sesión
+            </a>
+            <a href="{% url 'register' %}"
+              class="inline-flex items-center rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 transition-colors">
+              Registrarse
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- FLASH MESSAGES -->
+  {% if messages %}
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 space-y-2">
+      {% for message in messages %}
+        <div class="flex items-start gap-3 rounded-lg border px-4 py-3 text-sm
+          {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-800
+          {% elif message.tags == 'success' %}border-green-200 bg-green-50 text-green-800
+          {% elif message.tags == 'warning' %}border-yellow-200 bg-yellow-50 text-yellow-800
+          {% else %}border-blue-200 bg-blue-50 text-blue-800{% endif %}">
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- MAIN CONTENT -->
+  <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-16 border-t border-zinc-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <div class="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-900 text-white font-bold text-xs">F</div>
+            <span class="font-bold text-zinc-900">FundIt</span>
+          </div>
+          <p class="text-sm text-zinc-500">Plataforma de crowdfunding para proyectos que cambian vidas.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-zinc-900 mb-3">Navegación</h4>
+          <ul class="space-y-2 text-sm text-zinc-500">
+            <li><a href="{% url 'home' %}" class="hover:text-zinc-900">Inicio</a></li>
+            <li><a href="{% url 'campaign_list' %}" class="hover:text-zinc-900">Campañas</a></li>
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'my_donations' %}" class="hover:text-zinc-900">Mis donaciones</a></li>
+            {% else %}
+              <li><a href="{% url 'register' %}" class="hover:text-zinc-900">Registrarse</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-zinc-900 mb-3">Proyecto académico</h4>
+          <p class="text-sm text-zinc-500">Desarrollado como proyecto final del Diplomado Python Full Stack.</p>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-zinc-100 pt-6 text-center text-xs text-zinc-400">
+        © 2024 FundIt. Proyecto educativo.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
