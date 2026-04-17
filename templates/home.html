@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load campaign_tags %}
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
 
 <!-- HERO -->
-<section class="relative overflow-hidden rounded-2xl bg-green-950 px-8 py-16 text-white mb-12">
+<section class="relative overflow-hidden rounded-2xl bg-zinc-950 px-8 py-16 text-white mb-12">
   <div class="relative z-10 max-w-2xl">
     <span class="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-300 mb-4">
       Plataforma de crowdfunding
@@ -131,10 +132,9 @@
         <a href="{% url 'campaigns_by_category' cat.slug %}"
           class="card-hover group rounded-xl border border-zinc-200 bg-white p-5 text-center hover:border-zinc-900 transition-colors">
           <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-100 group-hover:bg-zinc-900 transition-colors">
-            <svg class="h-6 w-6 text-zinc-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-            </svg>
+            <span class="text-zinc-600 group-hover:text-white transition-colors">
+              {% category_icon cat.icono %}
+            </span>
           </div>
           <div class="text-sm font-semibold text-zinc-900">{{ cat.nombre }}</div>
           <div class="text-xs text-zinc-400 mt-1">{{ cat.total }} campaña{{ cat.total|pluralize:"s" }}</div>

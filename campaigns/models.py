@@ -3,10 +3,32 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 
 
+ICON_CHOICES = [
+    ('tecnologia',     'Tecnología'),
+    ('educacion',      'Educación'),
+    ('salud',          'Salud y Bienestar'),
+    ('gastronomia',    'Gastronomía'),
+    ('arte',           'Arte y Cultura'),
+    ('deporte',        'Deporte'),
+    ('medio_ambiente', 'Medio Ambiente'),
+    ('comunidad',      'Comunidad'),
+    ('emprendimiento', 'Emprendimiento'),
+    ('musica',         'Música'),
+    ('viaje',          'Viaje y Turismo'),
+    ('general',        'General'),
+]
+
+
 class Category(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre")
     descripcion = models.TextField(verbose_name="Descripción")
     slug = models.SlugField(unique=True, blank=True, verbose_name="Slug")
+    icono = models.CharField(
+        max_length=30,
+        choices=ICON_CHOICES,
+        default='general',
+        verbose_name="Ícono"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Creado en")
 
     class Meta:
