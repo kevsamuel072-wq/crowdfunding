@@ -149,5 +149,5 @@ crowdfunding/
 
 ## Autor
 
-Desarrollado en Quito, Ecuador.  
-Diplomado Python Full Stack — 2024
+Desarrollado por Samuel Bazantes y Verónica Cargua
+Proyecto Django
